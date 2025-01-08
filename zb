@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>babutv 港台直播</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .player-container {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .video-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        video {
+            width: 100%;
+            max-width: 640px;
+            height: 360px;
+            background-color: #000;
+            border-radius: 10px;
+        }
+        .loading {
+            text-align: center;
+            font-size: 16px;
+            color: #555;
+            padding: 10px;
+        }
+        .error-message {
+            text-align: center;
+            font-size: 16px;
+            color: red;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>babutv 港台直播</h1>
+
+    <!-- 播放器容器 -->
+    <div id="player-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        // 直播流配置
+        const streams = [
+            { title: "中天新聞台", link: "http://aktv.top/AKTV/live/aktv/null-8/AKTV.m3u8" },
+            { title: "翡翠台", link: "http://aktv.top/AKTV/live/aktv/null/AKTV.m3u8" },
+            { title: "TVBS-新聞台", link: "http://aktv.top/AKTV/live/aktv/tvbs-1/AKTV.m3u8" },
+            { title: "寰宇新聞台", link: "http://aktv.top/AKTV/live/aktv/null-9/AKTV.m3u8" },
+            { title: "鳳凰中文", link: "http://aktv.top/AKTV/live/aktv/null-3/AKTV.m3u8" },
+            { title: "TVBS", link: "http://aktv.top/AKTV/live/aktv/tvbs/AKTV.m3u8" },
+            { title: "无线新闻台(北美)", link: "http://aktv.top/AKTV/live/aktv2/null-1/AKTV.m3u8" },
+            { title: "鳳凰資訊", link: "http://aktv.top/AKTV/live/aktv/null-4/AKTV.m3u8" },
+            { title: "無線新聞台", link: "http://aktv.top/AKTV/live/aktv/null-1/AKTV.m3u8" },
+            { title: "美亞電影台(HK)", link: "http://aktv.top/AKTV/live/aktv/hk-1/AKTV.m3u8" },
+            { title: "明珠台", link: "http://aktv.top/AKTV/live/aktv/null-2/AKTV.m3u8" },
+            { title: "東森新聞", link: "http://aktv.top/AKTV/live/aktv2/null/AKTV.m3u8" },
+            { title: "鳳凰香港", link: "http://aktv.top/AKTV/live/aktv/null-5/AKTV.m3u8" },
+            { title: "TVB Plus", link: "http://aktv.top/AKTV/live/aktv/tvbplus/AKTV.m3u8" },
+            { title: "中天亞洲台", link: "http://aktv.top/AKTV/live/aktv/null-12/AKTV.m3u8" },
+            { title: "翡翠综合台(北美)", link: "http://aktv.top/AKTV/live/aktv/null-17/AKTV.m3u8" },
+            { title: "千禧經典台(HK)", link: "http://aktv.top/AKTV/live/aktv/null-15/AKTV.m3u8" },
+            { title: "翡翠剧集台(北美)", link: "http://aktv.top/AKTV/live/aktv/null-18/AKTV.m3u8" },
+            { title: "娛樂新聞台(HK)", link: "http://aktv.top/AKTV/live/aktv/hk/AKTV.m3u8" },
+            { title: "PopC", link: "http://aktv.top/AKTV/live/aktv/popc/AKTV.m3u8" },
+            { title: "黃金翡翠台", link: "http://aktv.top/AKTV/live/aktv/null-21/AKTV.m3u8" },
+            { title: "myTV SUPER 18台", link: "http://aktv.top/AKTV/live/aktv/mytvsuper18/AKTV.m3u8" },
+            { title: "中視", link: "http://aktv.top/AKTV/live/aktv/null-10/AKTV.m3u8" },
+            { title: "明珠剧集台(北美)", link: "http://aktv.top/AKTV/live/aktv/null-19/AKTV.m3u8" },
+            { title: "Channel 8 HD", link: "http://aktv.top/AKTV/live/aktv/channel8hd/AKTV.m3u8" },
+            { title: "Channel 5 HD", link: "http://aktv.top/AKTV/live/aktv/channel5hd/AKTV.m3u8" },
+            { title: "viutv 99", link: "http://aktv.top/AKTV/live/aktv2/viutv99/AKTV.m3u8" },
+            { title: "靖天電影台", link: "http://aktv.top/AKTV/live/aktv/null-6/AKTV.m3u8" },
+            { title: "華視", link: "http://aktv.top/AKTV/live/aktv/null-11/AKTV.m3u8" },
+            { title: "28 AI 智慧賽馬", link: "http://aktv.top/AKTV/live/aktv/28ai/AKTV.m3u8" },
+            { title: "tvN", link: "http://aktv.top/AKTV/live/aktv/tvn/AKTV.m3u8" },
+            { title: "龍華電影台", link: "http://aktv.top/AKTV/live/aktv/null-23/AKTV.m3u8" },
+            { title: "ROCK Action", link: "http://aktv.top/AKTV/live/aktv/rockaction/AKTV.m3u8" },
+            { title: "龍華經典台", link: "http://aktv.top/AKTV/live/aktv/null-7/AKTV.m3u8" },
+            { title: "viutv6 96", link: "http://aktv.top/AKTV/live/aktv2/viutv696/AKTV.m3u8" },
+            { title: "Channel U HD", link: "http://aktv.top/AKTV/live/aktv/channeluhd/AKTV.m3u8" },
+            { title: "Animax(HK)", link: "http://aktv.top/AKTV/live/aktv3/animaxhk/AKTV.m3u8" },
+            { title: "無線衛星新聞台", link: "http://aktv.top/AKTV/live/aktv3/null-2/AKTV.m3u8" },
+            { title: "龍華日韓台", link: "http://aktv.top/AKTV/live/aktv/null-22/AKTV.m3u8" },
+            { title: "Thrill", link: "http://aktv.top/AKTV/live/aktv3/thrill/AKTV.m3u8" },
+            { title: "France 24", link: "http://aktv.top/AKTV/live/aktv3/france24/AKTV.m3u8" },
+            { title: "DW", link: "http://aktv.top/AKTV/live/aktv3/dw/AKTV.m3u8" },
+            { title: "亞洲新聞台", link: "http://aktv.top/AKTV/live/aktv3/null-3/AKTV.m3u8" },
+            { title: "東方衛視國際頻道", link: "http://aktv.top/AKTV/live/aktv3/null/AKTV.m3u8" },
+            { title: "KIX", link: "http://aktv.top/AKTV/live/aktv3/kix/AKTV.m3u8" },
+            { title: "Nick Jr", link: "http://aktv.top/AKTV/live/aktv3/nickjr/AKTV.m3u8" },
+            { title: "Nickelodeon", link: "http://aktv.top/AKTV/live/aktv3/nickelodeon/AKTV.m3u8" },
+            { title: "AXN", link: "http://aktv.top/AKTV/live/aktv2/axn/AKTV.m3u8" },
+            { title: "i-Fun 動漫台", link: "http://aktv.top/AKTV/live/aktv2/ifun/AKTV.m3u8" },
+            { title: "NHK World-Japan", link: "http://aktv.top/AKTV/live/aktv3/nhkworldjapan/AKTV.m3u8" },
+            { title: "ZooMoo", link: "http://aktv.top/AKTV/live/aktv3/zoomoo/AKTV.m3u8" },
+            { title: "NHK東京総合", link: "http://aktv.top/AKTV/live/aktv3/nhk/AKTV.m3u8" },
+            { title: "Love Nature HD 1", link: "http://aktv.top/AKTV/live/aktv3/lovenaturehd/AKTV.m3u8" },
+            { title: "Love Nature HD 2", link: "http://aktv.top/AKTV/live/aktv2/lovenaturehd/AKTV.m3u8" },
+            { title: "Astro iQIYI", link: "http://aktv.top/AKTV/live/aktv3/astroiqiyi/AKTV.m3u8" },
+            { title: "Astro Xing He", link: "http://aktv.top/AKTV/live/aktv3/astroxinghe/AKTV.m3u8" },
+            { title: "Astro AEC", link: "http://aktv.top/AKTV/live/aktv3/astroaec/AKTV.m3u8" },
+            { title: "纬来体育台", link: "http://aktv.top/AKTV/live/aktv3/null-1/AKTV.m3u8" }
+        ];
+
+        // 动态生成播放器HTML
+        const container = document.getElementById('player-container');
+        streams.forEach((stream, index) => {
+            const playerHTML = `
+                <div class="player-container">
+                    <div class="video-title">${stream.title}</div>
+                    <video id="video${index + 1}" controls playsinline preload="auto" muted></video>
+                    <div class="loading" id="loading${index + 1}">加载中...</div>
+                    <p class="error-message" id="error${index + 1}">视频加载失败，请稍后再试。</p>
+                </div>
+            `;
+            container.innerHTML += playerHTML;
+        });
+
+        // 初始化HLS播放器
+        streams.forEach((stream, index) => {
+            const video = document.getElementById(`video${index + 1}`);
+            const loading = document.getElementById(`loading${index + 1}`);
+            const errorMsg = document.getElementById(`error${index + 1}`);
+
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(stream.link);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    loading.style.display = 'none';
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        console.error(`播放错误: ${stream.title}`);
+                        errorMsg.style.display = 'block';
+                    }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = stream.link;
+                video.addEventListener('loadeddata', () => {
+                    loading.style.display = 'none';
+                });
+                video.addEventListener('error', () => {
+                    errorMsg.style.display = 'block';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
